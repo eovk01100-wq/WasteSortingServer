@@ -8,6 +8,11 @@ spring:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3307}/${DB_NAME:wastesorting}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+  servlet:
+    multipart:
+      # 사진 한 장 2MB, 요청 전체 3MB까지
+      max-file-size: 2MB
+      max-request-size: 3MB
   jpa:
     hibernate:
       # 개발 중에는 엔티티에 맞춰 테이블을 자동으로 만들고 고친다
@@ -19,3 +24,9 @@ management:
     web:
       exposure:
         include: health
+
+gemini:
+  # 키는 .env 의 GEMINI_API_KEY 에서 읽는다 (여기에 직접 적지 않는다)
+  api-key: ${GEMINI_API_KEY:}
+  # 앱과 같은 모델. 404가 나면 ai.google.dev 에서 현재 모델명을 확인
+  model: gemini-3.1-flash-lite
