@@ -19,6 +19,10 @@ spring:
       ddl-auto: update
     open-in-view: false
 
+server:
+  # 배포 후 Nginx 뒤에서 실행될 때, 사용자 진짜 IP(X-Forwarded-For)를 읽어 IP당 제한이 맞게 동작하도록
+  forward-headers-strategy: native
+
 management:
   endpoints:
     web:
