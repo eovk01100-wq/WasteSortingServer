@@ -37,7 +37,8 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      # 이 컴퓨터 안에서만 접속 (서버에서는 Nginx가 받아서 넘겨 준다)
+      - "127.0.0.1:8080:8080"
 
 volumes:
   db-data:
