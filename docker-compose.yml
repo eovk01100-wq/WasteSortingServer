@@ -1,5 +1,5 @@
-# 1-2단계: DB(MySQL)만 띄운다. 서버(app)는 1-6단계에서 추가한다.
-# 비밀번호 같은 값은 같은 폴더의 .env에서 읽는다 (.env는 Git에 올리지 않는다).
+# 서버(app) + DB(MySQL)를 한 번에 띄운다: docker compose up -d --build
+# 비밀번호·키 같은 값은 같은 폴더의 .env에서 읽는다 (.env는 Git에 올리지 않는다).
 services:
   db:
     image: mysql:8.4
@@ -13,7 +13,7 @@ services:
       TZ: Asia/Seoul
     command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
     ports:
-      # 내 PC에서만 접속 가능 (127.0.0.1). PC에 다른 MySQL이 있어도 겹치지 않게 3307 사용
+      # 내 PC에서만 접속 가능 (127.0.0.1). IntelliJ로 서버를 돌릴 때 이 포트로 붙는다
       - "127.0.0.1:${DB_PORT:-3307}:3306"
     volumes:
       - db-data:/var/lib/mysql
@@ -22,6 +22,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  app:
+    build: .
+    image: wastesorting-server
+    container_name: wastesorting-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # 컨테이너끼리는 서비스 이름(db)과 내부 포트(3306)로 접속한다 (.env의 값을 덮어씀)
+      DB_HOST: db
+      DB_PORT: "3306"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
 
 volumes:
   db-data:

@@ -1,0 +1,11 @@
+# 이미지에 넣지 않을 것 (특히 .env 비밀값은 절대 이미지에 들어가면 안 된다)
+.env
+*.env
+.git
+.gradle
+.idea
+build
+out
+uploads
+*.iml
+HELP.md
