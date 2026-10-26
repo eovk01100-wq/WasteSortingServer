@@ -30,3 +30,10 @@ gemini:
   api-key: ${GEMINI_API_KEY:}
   # 앱과 같은 모델. 404가 나면 ai.google.dev 에서 현재 모델명을 확인
   model: gemini-3.1-flash-lite
+
+rate-limit:
+  # Gemini 비용 보호. 숫자는 .env 에서 바꿀 수 있다
+  per-token-per-minute: ${RATE_PER_TOKEN_PER_MINUTE:20}
+  per-ip-per-minute: ${RATE_PER_IP_PER_MINUTE:60}
+  device-issue-per-ip-per-hour: ${RATE_DEVICE_ISSUE_PER_IP_PER_HOUR:10}
+  daily-ai-cap: ${RATE_DAILY_AI_CAP:500}

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,6 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * 통과하면 요청에 사용자 id를 붙여 둔다 (request attribute "userId").
  */
 @Component
+@Order(1)
 public class TokenAuthFilter extends OncePerRequestFilter {
 
 	public static final String USER_ID = "userId";
