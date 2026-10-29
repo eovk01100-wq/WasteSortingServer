@@ -52,6 +52,18 @@ public class FrameStorage {
 		return p;
 	}
 
+	public byte[] read(String fileName) {
+		try {
+			return Files.readAllBytes(resolve(fileName));
+		} catch (IOException e) {
+			throw new UncheckedIOException("사진을 읽지 못했어요: " + fileName, e);
+		}
+	}
+
+	public boolean exists(String fileName) {
+		return Files.exists(resolve(fileName));
+	}
+
 	public void delete(String fileName) {
 		try {
 			Files.deleteIfExists(resolve(fileName));

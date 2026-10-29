@@ -73,6 +73,10 @@ public class Misdetection {
 	@Column(name = "reviewed_at")
 	private LocalDateTime reviewedAt;
 
+	/** 검수한 관리자 id */
+	@Column(name = "reviewed_by")
+	private Long reviewedBy;
+
 	/** 이 시각이 지나면 사진과 기록을 지운다 (보관 기간) */
 	@Column(name = "delete_after", nullable = false)
 	private LocalDateTime deleteAfter;
@@ -95,6 +99,24 @@ public class Misdetection {
 		this.consentAt = LocalDateTime.now();
 		this.deleteAfter = deleteAfter;
 	}
+
+	/** 정답 확정. label은 7개 분류 또는 other(배경 사진: 라벨 없이 학습) */
+	public void confirm(String label, Long adminId) {
+		this.confirmedLabel = label;
+		this.status = MisdetectionStatus.CONFIRMED;
+		this.reviewedBy = adminId;
+		this.reviewedAt = LocalDateTime.now();
+	}
+
+	/** 제외 (사진이 흐리거나 개인정보가 찍힌 경우 등) */
+	public void reject(Long adminId) {
+		this.confirmedLabel = null;
+		this.status = MisdetectionStatus.REJECTED;
+		this.reviewedBy = adminId;
+		this.reviewedAt = LocalDateTime.now();
+	}
+
+	public Long getReviewedBy() { return reviewedBy; }
 
 	public Long getId() { return id; }
 	public Long getAnalysisId() { return analysisId; }

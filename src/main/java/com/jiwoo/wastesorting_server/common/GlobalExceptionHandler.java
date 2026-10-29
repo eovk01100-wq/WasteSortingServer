@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -39,6 +40,12 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleMethod(HttpRequestMethodNotSupportedException e) {
 		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
 				.body(new ErrorResponse("METHOD_NOT_ALLOWED", e.getMethod() + " 방식은 이 주소에서 쓸 수 없어요"));
+	}
+
+	/** 주소 값의 형식이 틀린 경우 (예: status=WAITING, id=abc) */
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+		return ResponseEntity.badRequest().body(new ErrorResponse("BAD_REQUEST", e.getName() + " 값이 올바르지 않아요"));
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
