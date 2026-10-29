@@ -96,6 +96,8 @@ erDiagram
 
 ## API
 
+<img src="docs/screenshots/swagger.png" width="720" alt="Swagger UI 화면">
+
 모든 경로는 `/api/v1` 아래에 있습니다. 🔓 = 토큰 없이 호출 가능, 🛡 = 관리자 전용.
 
 | 메서드 | 경로 | 설명 |
@@ -151,6 +153,11 @@ flowchart LR
 
 업로드는 기본값이 **꺼짐**이고, 사용자가 켜야만 보냅니다. 사진은 1280px·JPEG로 줄여서 보내며,
 서버는 파일 앞부분(매직 바이트)으로 실제 이미지인지 확인합니다.
+
+| 관리자 검수: 서버가 그린 YOLO 박스 | 내보낸 재학습 데이터 (YOLO 형식) |
+|:---:|:---:|
+| <img src="docs/screenshots/review-box.png" width="300" alt="관리자 검수 이미지"> | <img src="docs/screenshots/export-zip.png" width="420" alt="YOLO zip 구조"> |
+| `GET /admin/misdetections/{id}/image?box=true` | `GET /admin/misdetections/export` 를 푼 모습 |
 
 **6. 남용 막기**
 AI를 부르는 요청(분석·검색)은 토큰당 1분 20회·IP당 1분 60회·서버 전체 하루 500회까지,
