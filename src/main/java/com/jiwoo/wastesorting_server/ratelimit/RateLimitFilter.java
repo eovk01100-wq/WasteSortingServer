@@ -58,11 +58,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) {
 		String path = request.getRequestURI();
-		return !(isAiRequest(path) || path.equals("/api/v1/auth/device"));
+		return !(isAiRequest(request) || path.equals("/api/v1/auth/device"));
 	}
 
-	private static boolean isAiRequest(String path) {
-		return path.startsWith("/api/v1/analyses") || path.startsWith("/api/v1/search");
+	/** Gemini를 부르는 요청만 센다: 사진 분석(POST /analyses)과 글자 검색. 기록 조회(GET)는 세지 않는다 */
+	private static boolean isAiRequest(HttpServletRequest request) {
+		String path = request.getRequestURI();
+		return ("POST".equals(request.getMethod()) && path.equals("/api/v1/analyses"))
+				|| path.equals("/api/v1/search");
 	}
 
 	@Override
