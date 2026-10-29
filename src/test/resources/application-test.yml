@@ -20,3 +20,6 @@ rate-limit:
   device-issue-per-ip-per-hour: 1000
   daily-ai-cap: 100000
   login-per-ip-per-10min: 1000
+
+storage:
+  upload-dir: build/test-uploads

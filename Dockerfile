@@ -15,7 +15,8 @@ RUN --mount=type=cache,target=/root/.gradle ./gradlew bootJar -x test --no-daemo
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 # root가 아닌 일반 사용자로 실행 (보안)
-RUN useradd --system --uid 1001 spring
+RUN useradd --system --uid 1001 spring \
+    && mkdir -p /app/uploads && chown spring /app/uploads
 COPY --from=build /app/build/libs/*-SNAPSHOT.jar app.jar
 USER spring
 EXPOSE 8080

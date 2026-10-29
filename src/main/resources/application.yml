@@ -52,3 +52,9 @@ jwt:
   secret: ${JWT_SECRET:}
   access-minutes: 15
   refresh-days: 14
+
+storage:
+  # 오탐 원본 사진 저장 폴더 (Docker에서는 볼륨 /app/uploads)
+  upload-dir: ${UPLOAD_DIR:uploads}
+  # 이 기간(일)이 지나면 사진과 기록을 지운다
+  retention-days: ${UPLOAD_RETENTION_DAYS:90}
