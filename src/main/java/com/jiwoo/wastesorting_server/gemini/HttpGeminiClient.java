@@ -80,12 +80,14 @@ public class HttpGeminiClient implements GeminiClient {
 				return extractText(send(json));
 			} catch (RestClientResponseException e) {
 				int code = e.getStatusCode().value();
-				if (attempt < maxAttempts) {
+				// 503(혼잡)·500만 다시 시도한다. 키 문제(400·401·403)나 한도 초과(429)는 다시 보내도 같으므로 바로 알린다
+				boolean retryable = code == 503 || code == 500;
+				if (retryable && attempt < maxAttempts) {
 					log.warn("Gemini HTTP {} → {}번째 다시 시도", code, attempt + 1);
 					sleep(attempt * 1000L);
 					continue;
 				}
-				log.warn("Gemini HTTP {} → {}번 시도 모두 실패", code, maxAttempts);
+				log.warn("Gemini HTTP {} ({}번째 시도에서 중단)", code, attempt);
 				throw new ApiException(HttpStatus.BAD_GATEWAY, "AI_BUSY", "AI 서버 오류 " + code + hint(code));
 			}
 		}
@@ -126,7 +128,7 @@ public class HttpGeminiClient implements GeminiClient {
 	private static String hint(int code) {
 		return switch (code) {
 			case 404 -> " (모델 이름을 확인하세요)";
-			case 400, 403 -> " (API 키를 확인하세요)";
+			case 400, 401, 403 -> " (API 키를 확인하세요)";
 			case 429 -> " (사용량 한도를 넘었어요)";
 			case 500, 503 -> " (AI 서버가 혼잡해요. 잠시 뒤 다시 시도하세요)";
 			default -> "";
