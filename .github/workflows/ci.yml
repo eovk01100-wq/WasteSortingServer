@@ -1,0 +1,35 @@
+# 푸시·PR마다 빌드와 전체 테스트(H2 + 실제 MySQL 통합 테스트)를 돌린다
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 17 (Amazon Corretto, 개발 PC와 같은 배포판)
+        uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: "17"
+
+      - name: Gradle 캐시
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: 테스트 (Docker가 있어서 MySQL 통합 테스트도 실행됨)
+        run: |
+          chmod +x gradlew
+          ./gradlew test --no-daemon
+
+      - name: 실패하면 테스트 보고서 올리기
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test

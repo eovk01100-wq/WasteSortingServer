@@ -39,6 +39,10 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-security-test")
 	// 테스트는 메모리 DB(H2)로 돌린다 (개발 DB를 더럽히지 않게). 실제 MySQL 통합 테스트는 3주차 Testcontainers
 	testRuntimeOnly("com.h2database:h2")
+	// 실제 MySQL(Docker)로 전체 흐름을 확인하는 통합 테스트. 버전은 Spring Boot가 관리
+	testImplementation("org.springframework.boot:spring-boot-testcontainers")
+	testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+	testImplementation("org.testcontainers:testcontainers-mysql")
 	testCompileOnly("org.projectlombok:lombok")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testAnnotationProcessor("org.projectlombok:lombok")
