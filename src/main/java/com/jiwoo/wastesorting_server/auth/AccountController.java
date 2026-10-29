@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.jiwoo.wastesorting_server.auth.AuthDtos.LoginRequest;
 import com.jiwoo.wastesorting_server.auth.AuthDtos.RefreshRequest;
 import com.jiwoo.wastesorting_server.auth.AuthDtos.SignupRequest;
@@ -16,6 +19,7 @@ import com.jiwoo.wastesorting_server.auth.AuthDtos.TokenResponse;
 import jakarta.validation.Valid;
 
 @RestController
+@Tag(name = "계정", description = "가입, 로그인, 토큰 재발급, 로그아웃")
 @RequestMapping("/api/v1/auth")
 public class AccountController {
 
@@ -28,14 +32,14 @@ public class AccountController {
 	/** 가입: 지금 기기 토큰의 익명 사용자를 계정으로 바꾼다 (기기 토큰 필요) */
 	@PostMapping("/signup")
 	@ResponseStatus(HttpStatus.CREATED)
-	public TokenResponse signup(@RequestAttribute(TokenAuthFilter.USER_ID) Long userId,
+	public TokenResponse signup(@Parameter(hidden = true) @RequestAttribute(TokenAuthFilter.USER_ID) Long userId,
 			@Valid @RequestBody SignupRequest req) {
 		return auth.signup(userId, req.email(), req.password());
 	}
 
 	/** 로그인 (토큰 없이 가능. 기기 토큰을 같이 보내면 그 기기의 기록을 계정으로 옮긴다) */
 	@PostMapping("/login")
-	public TokenResponse login(@RequestAttribute(name = TokenAuthFilter.USER_ID, required = false) Long userId,
+	public TokenResponse login(@Parameter(hidden = true) @RequestAttribute(name = TokenAuthFilter.USER_ID, required = false) Long userId,
 			@Valid @RequestBody LoginRequest req) {
 		return auth.login(req.email(), req.password(), userId);
 	}

@@ -1,0 +1,22 @@
+# 테스트 전용 설정 (@ActiveProfiles("test")). 개발 MySQL 대신 메모리 DB, Gemini는 가짜로 바꿔 끼운다
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+jwt:
+  secret: test-only-secret-key-0123456789-abcdefghij-0123456789
+
+gemini:
+  api-key: test-key
+
+rate-limit:
+  per-token-per-minute: 1000
+  per-ip-per-minute: 1000
+  device-issue-per-ip-per-hour: 1000
+  daily-ai-cap: 100000
+  login-per-ip-per-10min: 1000

@@ -7,10 +7,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.jiwoo.wastesorting_server.user.User;
 import com.jiwoo.wastesorting_server.user.UserRepository;
 
 @RestController
+@Tag(name = "계정", description = "가입, 로그인, 토큰 재발급, 로그아웃")
 @RequestMapping("/api/v1/auth")
 public class DeviceAuthController {
 
