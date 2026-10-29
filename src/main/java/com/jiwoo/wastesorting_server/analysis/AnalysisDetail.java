@@ -17,6 +17,7 @@ public record AnalysisDetail(
 		String note,
 		String yoloClass,
 		boolean misdetection,
+		boolean cached,
 		long latencyMs,
 		LocalDateTime createdAt) {
 }

@@ -41,3 +41,7 @@ rate-limit:
   per-ip-per-minute: ${RATE_PER_IP_PER_MINUTE:60}
   device-issue-per-ip-per-hour: ${RATE_DEVICE_ISSUE_PER_IP_PER_HOUR:10}
   daily-ai-cap: ${RATE_DAILY_AI_CAP:500}
+
+guide-cache:
+  # 글자 검색 캐시 유효 기간(일). 지나면 Gemini에서 다시 받는다
+  ttl-days: ${GUIDE_CACHE_TTL_DAYS:30}

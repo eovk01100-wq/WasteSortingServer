@@ -16,6 +16,8 @@ import com.jiwoo.wastesorting_server.gemini.GeminiClient;
 import com.jiwoo.wastesorting_server.gemini.GeminiParser;
 import com.jiwoo.wastesorting_server.gemini.GeminiPrompts;
 import com.jiwoo.wastesorting_server.gemini.WasteClasses;
+import com.jiwoo.wastesorting_server.guide.GuideCache;
+import com.jiwoo.wastesorting_server.guide.QueryNormalizer;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
@@ -31,10 +33,12 @@ public class AnalysisService {
 
 	private final GeminiClient gemini;
 	private final AnalysisRepository analyses;
+	private final GuideCache guideCache;
 
-	public AnalysisService(GeminiClient gemini, AnalysisRepository analyses) {
+	public AnalysisService(GeminiClient gemini, AnalysisRepository analyses, GuideCache guideCache) {
 		this.gemini = gemini;
 		this.analyses = analyses;
+		this.guideCache = guideCache;
 	}
 
 	// Gemini 응답을 기다리는 동안 DB 연결을 붙잡지 않도록 여기에는 @Transactional을 붙이지 않는다
@@ -65,10 +69,10 @@ public class AnalysisService {
 
 		// 탐지 라벨과 AI 판단이 다르면 오탐 후보 (화면 전체 분석은 비교할 라벨이 없음)
 		boolean misdetection = label != null && r.yoloClass() != null && !label.equals(r.yoloClass());
-		Analysis saved = save(userId, source, label, conf, null, r, misdetection, took);
+		Analysis saved = save(userId, source, label, conf, null, r, misdetection, false, took);
 		log.info("사진 분석 #{} {} label={} → {} 오탐={} ({}ms)", saved.getId(), source, label, r.yoloClass(),
 				misdetection, took);
-		return toResponse(saved.getId(), r, misdetection);
+		return toResponse(saved.getId(), r, misdetection, false);
 	}
 
 	public AnalysisResponse search(Long userId, String query) {
@@ -76,12 +80,18 @@ public class AnalysisService {
 		if (q.isEmpty() || q.length() > 50) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "BAD_QUERY", "검색어는 1~50자로 입력해 주세요");
 		}
+		String key = QueryNormalizer.normalize(q);
 		long start = System.currentTimeMillis();
-		DisposalResponse r = parse(gemini.generate(GeminiPrompts.text(q), null, null));
+		DisposalResponse r = guideCache.find(key).orElse(null);
+		boolean cached = r != null;
+		if (!cached) {
+			r = parse(gemini.generate(GeminiPrompts.text(q), null, null));
+			guideCache.put(key, r);
+		}
 		long took = System.currentTimeMillis() - start;
-		Analysis saved = save(userId, AnalysisSource.SEARCH, null, null, q, r, false, took);
-		log.info("글자 검색 #{} q={} ({}ms)", saved.getId(), q, took);
-		return toResponse(saved.getId(), r, false);
+		Analysis saved = save(userId, AnalysisSource.SEARCH, null, null, q, r, false, cached, took);
+		log.info("글자 검색 #{} q={} 캐시={} ({}ms)", saved.getId(), q, cached, took);
+		return toResponse(saved.getId(), r, false, cached);
 	}
 
 	@Transactional(readOnly = true)
@@ -99,14 +109,14 @@ public class AnalysisService {
 				.orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "NOT_FOUND", "기록을 찾을 수 없어요"));
 		return new AnalysisDetail(a.getId(), a.getSource(), a.getDetectedLabel(), a.getConfidence(), a.getQuery(),
 				a.getItemName(), a.getCategory(), readSteps(a.getStepsJson()), a.getCaution(), a.getNote(),
-				a.getYoloClass(), a.isMisdetection(), a.getLatencyMs(), a.getCreatedAt());
+				a.getYoloClass(), a.isMisdetection(), a.isCached(), a.getLatencyMs(), a.getCreatedAt());
 	}
 
 	private Analysis save(Long userId, AnalysisSource source, String label, Double conf, String query,
-			DisposalResponse r, boolean misdetection, long took) {
+			DisposalResponse r, boolean misdetection, boolean cached, long took) {
 		String stepsJson = JSON.writeValueAsString(r.steps() == null ? List.of() : r.steps());
 		return analyses.save(new Analysis(userId, source, label, conf, query, r.itemName(), r.category(), stepsJson,
-				r.caution(), r.note(), r.yoloClass(), misdetection, took));
+				r.caution(), r.note(), r.yoloClass(), misdetection, cached, took));
 	}
 
 	private static List<String> readSteps(String json) {
@@ -121,9 +131,9 @@ public class AnalysisService {
 		}
 	}
 
-	private static AnalysisResponse toResponse(Long id, DisposalResponse r, boolean misdetection) {
+	private static AnalysisResponse toResponse(Long id, DisposalResponse r, boolean misdetection, boolean cached) {
 		return new AnalysisResponse(id, r.itemName(), r.category(), r.steps(), r.caution(), r.note(), r.yoloClass(),
-				misdetection);
+				misdetection, cached);
 	}
 
 	private DisposalResponse parse(String text) {

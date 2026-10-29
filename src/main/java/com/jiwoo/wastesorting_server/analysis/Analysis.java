@@ -61,6 +61,10 @@ public class Analysis {
 	@Column(nullable = false)
 	private boolean misdetection;
 
+	/** 글자 검색에서 캐시로 답했는지 (기존 행은 false로 채워짐) */
+	@Column(nullable = false, columnDefinition = "boolean default false")
+	private boolean cached;
+
 	@Column(name = "latency_ms", nullable = false)
 	private long latencyMs;
 
@@ -72,7 +76,7 @@ public class Analysis {
 
 	public Analysis(Long userId, AnalysisSource source, String detectedLabel, Double confidence, String query,
 			String itemName, String category, String stepsJson, String caution, String note, String yoloClass,
-			boolean misdetection, long latencyMs) {
+			boolean misdetection, boolean cached, long latencyMs) {
 		this.userId = userId;
 		this.source = source;
 		this.detectedLabel = detectedLabel;
@@ -85,6 +89,7 @@ public class Analysis {
 		this.note = note;
 		this.yoloClass = yoloClass;
 		this.misdetection = misdetection;
+		this.cached = cached;
 		this.latencyMs = latencyMs;
 		this.createdAt = LocalDateTime.now();
 	}
@@ -102,6 +107,7 @@ public class Analysis {
 	public String getNote() { return note; }
 	public String getYoloClass() { return yoloClass; }
 	public boolean isMisdetection() { return misdetection; }
+	public boolean isCached() { return cached; }
 	public long getLatencyMs() { return latencyMs; }
 	public LocalDateTime getCreatedAt() { return createdAt; }
 }
