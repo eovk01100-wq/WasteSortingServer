@@ -26,6 +26,13 @@ public final class TokenHasher {
 		return "dev_" + Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
 	}
 
+	/** 로그인 후 받는 리프레시 토큰 원문. 예: rt_9fK2... */
+	public static String newRefreshToken() {
+		byte[] bytes = new byte[32];
+		RANDOM.nextBytes(bytes);
+		return "rt_" + Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+	}
+
 	/** DB에 저장·비교하는 값 (64자 16진수) */
 	public static String sha256(String token) {
 		try {

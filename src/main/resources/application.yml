@@ -41,7 +41,14 @@ rate-limit:
   per-ip-per-minute: ${RATE_PER_IP_PER_MINUTE:60}
   device-issue-per-ip-per-hour: ${RATE_DEVICE_ISSUE_PER_IP_PER_HOUR:10}
   daily-ai-cap: ${RATE_DAILY_AI_CAP:500}
+  login-per-ip-per-10min: ${RATE_LOGIN_PER_IP_PER_10MIN:10}
 
 guide-cache:
   # 글자 검색 캐시 유효 기간(일). 지나면 Gemini에서 다시 받는다
   ttl-days: ${GUIDE_CACHE_TTL_DAYS:30}
+
+jwt:
+  # .env 의 JWT_SECRET (32자 이상, 없으면 서버가 켜지지 않음)
+  secret: ${JWT_SECRET:}
+  access-minutes: 15
+  refresh-days: 14

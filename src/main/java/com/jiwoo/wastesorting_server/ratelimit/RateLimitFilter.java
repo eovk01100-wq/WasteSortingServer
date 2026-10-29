@@ -37,6 +37,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 	private final FixedWindowLimiter perToken;
 	private final FixedWindowLimiter perIp;
 	private final FixedWindowLimiter deviceIssue;
+	private final FixedWindowLimiter loginAttempt;
 	private final int dailyCap;
 
 	private volatile LocalDate day = LocalDate.now(SEOUL);
@@ -46,19 +47,26 @@ public class RateLimitFilter extends OncePerRequestFilter {
 			@Value("${rate-limit.per-token-per-minute:20}") int perTokenPerMinute,
 			@Value("${rate-limit.per-ip-per-minute:60}") int perIpPerMinute,
 			@Value("${rate-limit.device-issue-per-ip-per-hour:10}") int deviceIssuePerHour,
-			@Value("${rate-limit.daily-ai-cap:500}") int dailyCap) {
+			@Value("${rate-limit.daily-ai-cap:500}") int dailyCap,
+			@Value("${rate-limit.login-per-ip-per-10min:10}") int loginPer10Min) {
 		this.perToken = new FixedWindowLimiter(perTokenPerMinute, 60_000);
 		this.perIp = new FixedWindowLimiter(perIpPerMinute, 60_000);
 		this.deviceIssue = new FixedWindowLimiter(deviceIssuePerHour, 3_600_000);
+		this.loginAttempt = new FixedWindowLimiter(loginPer10Min, 600_000);
 		this.dailyCap = dailyCap;
-		log.info("사용량 제한: 토큰당 {}/분, IP당 {}/분, 토큰 발급 IP당 {}/시간, 하루 AI {}회",
-				perTokenPerMinute, perIpPerMinute, deviceIssuePerHour, dailyCap);
+		log.info("사용량 제한: 토큰당 {}/분, IP당 {}/분, 토큰 발급 IP당 {}/시간, 하루 AI {}회, 로그인·가입 IP당 {}/10분",
+				perTokenPerMinute, perIpPerMinute, deviceIssuePerHour, dailyCap, loginPer10Min);
 	}
 
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) {
 		String path = request.getRequestURI();
-		return !(isAiRequest(request) || path.equals("/api/v1/auth/device"));
+		return !(isAiRequest(request) || path.equals("/api/v1/auth/device") || isLoginRequest(path));
+	}
+
+	/** 비밀번호를 마구 넣어 보는 것을 막는다 */
+	private static boolean isLoginRequest(String path) {
+		return path.equals("/api/v1/auth/login") || path.equals("/api/v1/auth/signup");
 	}
 
 	/** Gemini를 부르는 요청만 센다: 사진 분석(POST /analyses)과 글자 검색. 기록 조회(GET)는 세지 않는다 */
@@ -79,6 +87,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
 			long wait = deviceIssue.tryAcquire(ip, now);
 			if (wait > 0) {
 				reject(response, wait, "RATE_LIMITED", "토큰 발급 요청이 너무 많아요. 잠시 뒤 다시 시도하세요");
+				return;
+			}
+			chain.doFilter(request, response);
+			return;
+		}
+
+		if (isLoginRequest(path)) {
+			long wait = loginAttempt.tryAcquire(ip, now);
+			if (wait > 0) {
+				reject(response, wait, "RATE_LIMITED", "로그인 시도가 너무 많아요. 잠시 뒤 다시 시도하세요");
 				return;
 			}
 			chain.doFilter(request, response);
