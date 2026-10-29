@@ -20,4 +20,9 @@ public interface AnalysisRepository extends JpaRepository<Analysis, Long> {
 	@Modifying
 	@Query("update Analysis a set a.userId = :to where a.userId = :from")
 	int moveAll(@Param("from") Long from, @Param("to") Long to);
+
+	/** 탈퇴: 이 사용자의 기록을 모두 지운다 */
+	@Modifying
+	@Query("delete from Analysis a where a.userId = :userId")
+	int deleteAllByUser(@Param("userId") Long userId);
 }

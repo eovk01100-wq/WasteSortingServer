@@ -11,6 +11,8 @@ public interface MisdetectionRepository extends JpaRepository<Misdetection, Long
 
 	boolean existsByAnalysisId(Long analysisId);
 
+	List<Misdetection> findByUserId(Long userId);
+
 	List<Misdetection> findTop200ByDeleteAfterBefore(LocalDateTime time);
 
 	Page<Misdetection> findByStatusOrderByIdDesc(MisdetectionStatus status, Pageable pageable);

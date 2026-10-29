@@ -54,7 +54,11 @@ public class TokenAuthFilter extends OncePerRequestFilter {
 			} else if (!token.isEmpty()) {
 				try {
 					JwtProvider.AccessClaims c = jwt.parse(token);
-					authenticate(request, c.userId(), c.role());
+					if (users.existsById(c.userId())) {
+						authenticate(request, c.userId(), c.role());
+					} else {
+						request.setAttribute(AUTH_ERROR, "INVALID_TOKEN"); // 탈퇴한 사용자의 남은 토큰
+					}
 				} catch (ExpiredJwtException e) {
 					request.setAttribute(AUTH_ERROR, "TOKEN_EXPIRED");
 				} catch (JwtException | IllegalArgumentException e) {
