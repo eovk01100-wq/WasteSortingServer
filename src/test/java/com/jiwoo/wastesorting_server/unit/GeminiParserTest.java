@@ -17,7 +17,7 @@ class GeminiParserTest {
 	@DisplayName("```json 코드블록으로 감싸 와도 읽는다")
 	void stripsCodeFence() {
 		DisposalResponse r = GeminiParser.parse("```json\n{\"itemName\":\"캔\",\"steps\":[\"헹군다\"],\"yoloClass\":\"can\"}\n```");
-		assertThat(r.itemName()).isEqualTo("캔x");
+		assertThat(r.itemName()).isEqualTo("캔");
 		assertThat(r.yoloClass()).isEqualTo("can");
 	}
 
