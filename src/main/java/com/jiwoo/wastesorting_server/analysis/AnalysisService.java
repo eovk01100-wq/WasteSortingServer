@@ -90,7 +90,7 @@ public class AnalysisService {
 		}
 		long took = System.currentTimeMillis() - start;
 		Analysis saved = save(userId, AnalysisSource.SEARCH, null, null, q, r, false, cached, took);
-		log.info("글자 검색 #{} q={} 캐시={} ({}ms)", saved.getId(), q, cached, took);
+		log.info("글자 검색 #{} 글자수={} 캐시={} ({}ms)", saved.getId(), q.length(), cached, took);
 		return toResponse(saved.getId(), r, false, cached);
 	}
 
