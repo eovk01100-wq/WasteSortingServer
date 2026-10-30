@@ -2,6 +2,8 @@ package com.jiwoo.wastesorting_server.auth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -54,6 +56,18 @@ public class SecurityConfig {
 								JsonErrors.write(response, 403, "FORBIDDEN", "권한이 없어요")))
 				.addFilterBefore(new TokenAuthFilter(users, jwt), UsernamePasswordAuthenticationFilter.class);
 		return http.build();
+	}
+
+	/**
+	 * Spring 기본 로그인(아이디·비밀번호 폼, Basic)은 쓰지 않는다.
+	 * 이 빈이 없으면 Spring Boot가 메모리 사용자 "user"를 만들고
+	 * 로그에 "Using generated security password"를 찍는다. 인증은 TokenAuthFilter가 직접 한다.
+	 */
+	@Bean
+	AuthenticationManager authenticationManager() {
+		return authentication -> {
+			throw new ProviderNotFoundException("기본 로그인은 사용하지 않아요");
+		};
 	}
 
 	/** 비밀번호는 BCrypt 해시로만 저장 */
