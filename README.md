@@ -6,8 +6,7 @@ Android 앱 **[버림가이드](https://github.com/eovk01100-wq/WasteSortingApp)
 앱에 있던 Gemini 호출을 서버로 옮겨 **API 키를 휴대폰에서 없애고**, 분석 기록·계정·검색 캐시를 관리하며,
 온디바이스 YOLO가 틀린 사진을 모아 **사람이 검수한 뒤 재학습 데이터(YOLO 형식 ZIP)로 내보내는** 흐름을 담당합니다.
 
-- 운영 주소: `https://buriimguide-jiwoo.duckdns.org`
-- API 문서(Swagger): `https://buriimguide-jiwoo.duckdns.org/swagger-ui/index.html`
+- AWS EC2(서울)에 HTTPS로 배포해 실제 앱이 사용 중입니다. 운영 주소와 운영 Swagger는 비공개이며, 화면은 아래 사진으로 대신합니다.
 
 ## 기술 스택
 
